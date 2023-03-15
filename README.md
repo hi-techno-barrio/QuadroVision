@@ -23,3 +23,8 @@ Is customizable: The code can be easily customized to handle different numbers o
 Overall, this code demonstrates how to use OpenCV's stitching module to stitch together video streams from multiple cameras into a single panoramic video
 
 Design 2
+Wider field of view: Using multiple cameras positioned 90 degrees apart provides a wider field of view compared to traditional single-camera setups.
+Higher resolution: Combining the images from multiple cameras can result in a higher resolution panoramic image compared to stitching together images from a single camera.
+Object tracking and orientation: By integrating object detection and an IMU, the code can track objects and provide their distance, degrees, and orientation relative to the camera.
+Real-time display: The code can display the panoramic video in real-time, allowing for immediate feedback and monitoring.
+Open-source: The code is open-source and can be easily modified and customized to meet specific requirements.
