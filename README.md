@@ -28,3 +28,26 @@ Higher resolution: Combining the images from multiple cameras can result in a hi
 Object tracking and orientation: By integrating object detection and an IMU, the code can track objects and provide their distance, degrees, and orientation relative to the camera.
 Real-time display: The code can display the panoramic video in real-time, allowing for immediate feedback and monitoring.
 Open-source: The code is open-source and can be easily modified and customized to meet specific requirements.
+
+Design 3:
+The features of the program are:
+
+Four cameras positioned at 90-degree intervals covering 360 degrees to produce a single panoramic video.
+
+Object detection using OpenCV library to detect objects in each camera's field of view.
+
+Distance and degrees calculations to determine the location of the detected object from each camera.
+
+Use of MPU6050 sensor data to calculate the orientation of the camera.
+
+Use of GPS coordinates to determine the exact location of the detected object.
+
+Calculation of the XYZ orientation of the detected object from each camera.
+
+Text overlays added to the final panorama to display object name, distance, degrees, and orientation.
+
+Multi-band blending to combine the four warped frames into a final panoramic video.
+
+Real-time processing of video streams.
+
+Overall, the program uses multiple sensors and libraries to detect objects, determine their location and orientation, and combine the video streams into a panoramic view with object information displayed. This has potential applications in surveillance, security, and other areas where it is important to monitor a wide area and detect objects with accuracy.
