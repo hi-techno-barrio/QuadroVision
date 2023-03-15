@@ -123,48 +123,156 @@ cvReleaseCapture(&video4);
 return 0;
 }
 
-// Function to detect objects in an image
-// Returns object name, distance, and angle in degrees
 void object_detection(IplImage* frame, char* name, float* distance, float* angle)
 {
-    // TODO: Implement object detection algorithm
-    
-    // Example code for demonstration purposes only
-    strcpy(name, "Person");
-    *distance = 2.5;
-    *angle = 45.0;
+    // Load the pre-trained classifier for object detection
+    CvHaarClassifierCascade* cascade = (CvHaarClassifierCascade*) cvLoad("haarcascade_frontalface_alt.xml");
+
+    // Convert the image to grayscale
+    IplImage* gray = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+    cvCvtColor(frame, gray, CV_BGR2GRAY);
+
+    // Detect objects in the image
+    CvSeq* objects = cvHaarDetectObjects(gray, cascade, cvCreateMemStorage(), 1.1, 3, CV_HAAR_DO_CANNY_PRUNING, cvSize(30, 30));
+
+    // Check if an object was detected
+    if (objects->total > 0) {
+        // Get the first object detected
+        CvRect* r = (CvRect*) cvGetSeqElem(objects, 0);
+
+        // Compute the center of the object
+        int x = r->x + r->width/2;
+        int y = r->y + r->height/2;
+
+        // Compute the distance and angle of the object from the center of the image
+        *distance = sqrt(pow(x - frame->width/2, 2) + pow(y - frame->height/2, 2));
+        *angle = atan2(y - frame->height/2, x - frame->width/2) * 180 / CV_PI;
+
+        // Set the name of the detected object
+        strcpy(name, "Person");
+    }
+    else {
+        // No object was detected
+        strcpy(name, "None");
+        *distance = 0;
+        *angle = 0;
+    }
+
+    // Release memory
+    cvReleaseImage(&gray);
+    cvReleaseHaarClassifierCascade(&cascade);
 }
 
 // Function to calculate the distance and angle of an object in an image
 // Returns the distance and angle in degrees
 void calculate_distance_and_angle(IplImage* frame, float* distance, float* angle)
 {
-    // TODO: Implement distance and angle calculation algorithm
-    
-    // Example code for demonstration purposes only
-    *distance = 2.5;
-    *angle = 45.0;
+    // Convert the image to grayscale
+    IplImage* gray = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+    cvCvtColor(frame, gray, CV_BGR2GRAY);
+
+    // Detect edges using Canny edge detector
+    IplImage* edges = cvCreateImage(cvGetSize(gray), IPL_DEPTH_8U, 1);
+    cvCanny(gray, edges, 100, 200);
+
+    // Find contours in the image
+    CvSeq* contours;
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    cvFindContours(edges, storage, &contours, sizeof(CvContour), CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+
+    // Find the largest contour in the image
+    CvSeq* largest_contour = NULL;
+    double largest_area = 0.0;
+    for (CvSeq* c = contours; c != NULL; c = c->h_next) {
+        double area = fabs(cvContourArea(c));
+        if (area > largest_area) {
+            largest_contour = c;
+            largest_area = area;
+        }
+    }
+
+    // Find the center of mass of the largest contour
+    CvMoments moments;
+    cvMoments(largest_contour, &moments);
+    double cx = moments.m10 / moments.m00;
+    double cy = moments.m01 / moments.m00;
+
+    // Calculate the distance and angle of the object
+    double image_width = frame->width;
+    double image_height = frame->height;
+    double fov = 60.0; // Camera field of view in degrees
+    double aspect_ratio = image_width / image_height;
+    double focal_length = image_width / (2.0 * tan(fov * M_PI / 360.0));
+    double x = cx - image_width / 2.0;
+    double y = cy - image_height / 2.0;
+    double object_distance = sqrt(pow(x, 2.0) + pow(y, 2.0)) * (1.0 / focal_length);
+    double object_angle = atan(x / (focal_length * aspect_ratio)) * 180.0 / M_PI;
+
+    // Return the distance and angle of the object
+    *distance = object_distance;
+    *angle = object_angle;
+
+    // Cleanup
+    cvReleaseMemStorage(&storage);
+    cvReleaseImage(&gray);
+    cvReleaseImage(&edges);
 }
 
-// Function to calculate the XYZ orientation of the detected object
-// Returns the XYZ orientation as a string
+
 char* calculate_orientation(float roll, float pitch, float yaw)
 {
-    // TODO: Implement orientation calculation algorithm
-    
-    // Example code for demonstration purposes only
-    char* orientation = "X: 10 Y: 20 Z: 30";
+    // Convert roll, pitch, and yaw angles from degrees to radians
+    float phi = roll * CV_PI / 180.0;
+    float theta = pitch * CV_PI / 180.0;
+    float psi = yaw * CV_PI / 180.0;
+
+    // Compute the rotation matrix
+    float R11 = cos(theta) * cos(psi);
+    float R12 = -cos(phi) * sin(psi) + sin(phi) * sin(theta) * cos(psi);
+    float R13 = sin(phi) * sin(psi) + cos(phi) * sin(theta) * cos(psi);
+    float R21 = cos(theta) * sin(psi);
+    float R22 = cos(phi) * cos(psi) + sin(phi) * sin(theta) * sin(psi);
+    float R23 = -sin(phi) * cos(psi) + cos(phi) * sin(theta) * sin(psi);
+    float R31 = -sin(theta);
+    float R32 = sin(phi) * cos(theta);
+    float R33 = cos(phi) * cos(theta);
+
+    // Compute the XYZ orientation of the detected object
+    float x = R31;
+    float y = R32;
+    float z = R33;
+
+    // Create the orientation string
+    static char orientation[50];
+    sprintf(orientation, "X: %0.2f Y: %0.2f Z: %0.2f", x, y, z);
+
     return orientation;
 }
+
 
 // Function to get GPS coordinates
 // Returns the latitude and longitude as a string
 char* get_gps_coordinates()
 {
-    // TODO: Implement GPS coordinate retrieval algorithm
-    
-    // Example code for demonstration purposes only
-    char* coordinates = "Latitude: 40.7128 Longitude: -74.0060";
+    // Initialize the GPS data structures
+    gps_init();
+    struct timeval tv;
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+
+    // Wait for a fix
+    while (gps_waiting(&gps_data, 5000)) {
+        if (gps_read(&gps_data) == -1) {
+            continue;
+        }
+        if (gps_data.status == STATUS_FIX) {
+            break;
+        }
+    }
+
+    // Get the latitude and longitude
+    char* coordinates = (char*)malloc(100*sizeof(char));
+    sprintf(coordinates, "Latitude: %f Longitude: %f", gps_data.fix.latitude, gps_data.fix.longitude);
     return coordinates;
 }
 
