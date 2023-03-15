@@ -127,29 +127,47 @@ return 0;
 // Returns object name, distance, and angle in degrees
 void object_detection(IplImage* frame, char* name, float* distance, float* angle)
 {
-// TODO: Implement object detection algorithm
+    // TODO: Implement object detection algorithm
+    
+    // Example code for demonstration purposes only
+    strcpy(name, "Person");
+    *distance = 2.5;
+    *angle = 45.0;
 }
 
 // Function to calculate the distance and angle of an object in an image
 // Returns the distance and angle in degrees
 void calculate_distance_and_angle(IplImage* frame, float* distance, float* angle)
 {
-// TODO: Implement distance and angle calculation algorithm
+    // TODO: Implement distance and angle calculation algorithm
+    
+    // Example code for demonstration purposes only
+    *distance = 2.5;
+    *angle = 45.0;
 }
 
 // Function to calculate the XYZ orientation of the detected object
 // Returns the XYZ orientation as a string
 char* calculate_orientation(float roll, float pitch, float yaw)
 {
-// TODO: Implement orientation calculation algorithm
+    // TODO: Implement orientation calculation algorithm
+    
+    // Example code for demonstration purposes only
+    char* orientation = "X: 10 Y: 20 Z: 30";
+    return orientation;
 }
 
 // Function to get GPS coordinates
 // Returns the latitude and longitude as a string
 char* get_gps_coordinates()
 {
-// TODO: Implement GPS coordinate retrieval algorithm
+    // TODO: Implement GPS coordinate retrieval algorithm
+    
+    // Example code for demonstration purposes only
+    char* coordinates = "Latitude: 40.7128 Longitude: -74.0060";
+    return coordinates;
 }
+
 // Combine the four warped frames into a single panoramic video
 cvSeamlessClone(warp1, pano, mask1, cvPoint(pano->width/2, pano->height/2), panorama, CV_NORMAL_CLONE);
 cvSeamlessClone(warp2, pano, mask2, cvPoint(pano->width/2, pano->height/2), panorama, CV_NORMAL_CLONE);
